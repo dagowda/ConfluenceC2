@@ -2,6 +2,10 @@
 
 **Author:** Dhanush Arvind
 
+<p align="center">
+  <img src="https://github.com/dagowda/DSViper/blob/1220ebeba489dbb2bdde1c1c11d97d86d905f533/img/screenshot1.jpg" alt="image_alt">
+</p>
+
 ## Prerequisites
 
 **Python 3.8+** with `requests`:
