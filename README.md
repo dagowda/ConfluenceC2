@@ -15,7 +15,7 @@ pip install requests
   - WSL with `x86_64-w64-mingw32-gcc` (`sudo apt install gcc-mingw-w64-x86-64`), or
   - Native MinGW-w64 installed on Windows and added to PATH
 
-## Step 1: Create the C2 Page
+## Step 1: Create the C2 Page or create it manually using the browser
 
 ```
 python c2_operator.py ^
