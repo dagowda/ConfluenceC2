@@ -11,7 +11,7 @@ pip install requests
 
 **Confluence Cloud** account with an API token (generate at https://id.atlassian.com/manage-profile/security/api-tokens), or Confluence Server credentials
 
-**MinGW GCC** — either:
+**MinGW GCC**  either:
   - WSL with `x86_64-w64-mingw32-gcc` (`sudo apt install gcc-mingw-w64-x86-64`), or
   - Native MinGW-w64 installed on Windows and added to PATH
 
